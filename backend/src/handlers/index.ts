@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { comparePassword, hashPassword } from '../utils/auth';
 import slugify from 'slugify';
 import UserModel from '../models/User';
+import { generateJWT } from '../utils/jwt';
 // import slug from 'slug';
 
 export const getUsers = async (req: Request, res: Response) => {
@@ -11,7 +12,6 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const createAccount = async (req: Request, res: Response) => {
   // Error handle, check if the field are completed
-
   //if every field is completed then checks if the email and the handle are already registered
   const { email, password } = req.body;
   const userExist = await UserModel.findOne({ email });
@@ -54,5 +54,6 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(401).json({ error: error.message });
     return;
   }
+  const token = generateJWT({ id: user._id });
   res.send('User loged succesfully...');
 };
