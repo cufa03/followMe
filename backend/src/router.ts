@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { createAccount, getUsers, loginUser } from './handlers';
+import { createAccount, getUser, getUsers, loginUser } from './handlers';
 import { handleInputErrors } from './middleware/validation';
+import { authenticate } from './middleware/auth';
 const router = Router();
 
 // Routing
@@ -11,6 +12,7 @@ router.get('/', (req, res) => {
 
 // Get all users
 router.get('/users', getUsers);
+router.get('/user', authenticate, getUser);
 
 // Auth and Register and check user input before creating the account
 router.post(
