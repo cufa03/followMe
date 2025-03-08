@@ -13,8 +13,8 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 export const getUser = async (req: Request, res: Response) => {
-  console.log('From getUser');
-  res.json(req.user);
+  // console.log('From router/getUser');
+  res.send(req.user);
 };
 
 export const createAccount = async (req: Request, res: Response) => {
@@ -62,6 +62,7 @@ export const loginUser = async (req: Request, res: Response) => {
     return;
   }
   const token = generateJWT({ id: user._id });
-  console.log('token: ', token);
-  res.send('User loged succesfully...');
+  // console.log('token: ', token);
+  // res.send('User loged succesfully...');
+  res.send(token);
 };
