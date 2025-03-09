@@ -66,3 +66,26 @@ export const loginUser = async (req: Request, res: Response) => {
   // res.send('User loged succesfully...');
   res.send(token);
 };
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { description } = req.body;
+
+    const handle = slugify(req.body.handle, '');
+    const handleExist = await UserModel.findOne({ handle });
+    if (handleExist && handleExist.email !== req.user.email) {
+      const error = new Error('Username already in use...');
+      res.status(409).json({ error: error.message });
+      return;
+    }
+
+    // Update user info
+    req.user.description = description;
+    req.user.handle = handle;
+    await req.user.save();
+    res.send('User information updated succesfully');
+  } catch (err) {
+    const error = new Error('Something went wrong');
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { createAccount, getUser, getUsers, loginUser } from './handlers';
+import {
+  createAccount,
+  getUser,
+  getUsers,
+  loginUser,
+  updateUser,
+} from './handlers';
 import { handleInputErrors } from './middleware/validation';
 import { authenticate } from './middleware/auth';
 const router = Router();
@@ -13,6 +19,14 @@ router.get('/', (req, res) => {
 // Get all users
 router.get('/users', getUsers);
 router.get('/user', authenticate, getUser);
+router.patch(
+  '/user',
+  body('handle').notEmpty().withMessage('The handle must not be empty'),
+  body('description').notEmpty().withMessage('Complete the description'),
+  handleInputErrors,
+  authenticate,
+  updateUser
+);
 
 // Auth and Register and check user input before creating the account
 router.post(
