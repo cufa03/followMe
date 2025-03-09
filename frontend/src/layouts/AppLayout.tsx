@@ -10,7 +10,6 @@ export default function AppLayout() {
     retry: 1,
     refetchOnWindowFocus: false,
   });
-  console.log(data);
   if (isLoading) return 'Loading...';
   if (isError) {
     return <Navigate to={'/auth/login'} />;
