@@ -6,6 +6,7 @@ import {
   getUsers,
   loginUser,
   updateUser,
+  uploadImage,
 } from './handlers';
 import { handleInputErrors } from './middleware/validation';
 import { authenticate } from './middleware/auth';
@@ -51,5 +52,7 @@ router.post(
   handleInputErrors,
   loginUser
 );
+
+router.post('/user/image', authenticate, uploadImage);
 
 export default router;

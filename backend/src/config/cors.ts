@@ -1,4 +1,3 @@
-import { white } from 'colors';
 import { CorsOptions } from 'cors';
 process.loadEnvFile();
 

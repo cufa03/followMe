@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
 import { comparePassword, hashPassword } from '../utils/auth';
 import slugify from 'slugify';
+import formidable from 'formidable';
+import { v4 as uuid } from 'uuid';
 import UserModel from '../models/User';
 import { generateJWT } from '../utils/jwt';
-// import slug from 'slug';
+import cloudinary from '../config/cloudinary';
 
+// import slug from 'slug';
 // process.loadEnvFile();
 
 export const getUsers = async (req: Request, res: Response) => {
@@ -69,7 +72,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { description } = req.body;
+    const { description, links } = req.body;
 
     const handle = slugify(req.body.handle, '');
     const handleExist = await UserModel.findOne({ handle });
@@ -82,8 +85,36 @@ export const updateUser = async (req: Request, res: Response) => {
     // Update user info
     req.user.description = description;
     req.user.handle = handle;
+    req.user.links = links;
     await req.user.save();
     res.send('User information updated succesfully');
+  } catch (err) {
+    const error = new Error('Something went wrong');
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const uploadImage = async (req: Request, res: Response) => {
+  const form = formidable({ multiples: false });
+
+  try {
+    form.parse(req, (error, fields, files) => {
+      cloudinary.uploader.upload(
+        files.file[0].filepath,
+        { public_id: uuid() },
+        async function (error, result) {
+          if (error) {
+            const error = new Error('Something went wrong uploading image');
+            res.status(500).json({ error: error.message });
+          }
+          if (result) {
+            req.user.image = result.secure_url;
+            await req.user.save();
+            res.json({ image: result.secure_url });
+          }
+        }
+      );
+    });
   } catch (err) {
     const error = new Error('Something went wrong');
     res.status(500).json({ error: error.message });
