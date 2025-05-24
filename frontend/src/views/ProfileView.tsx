@@ -3,7 +3,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 import ErrorMessage from '../components/ErrorMessage';
 import { ProfileForm, User } from '../types';
-import { updateProfile } from '../api/DevTreeApi';
+import { updateProfile, uploadImage } from '../api/DevTreeApi';
 import { toast } from 'sonner';
 
 export default function ProfileView() {
@@ -20,6 +20,7 @@ export default function ProfileView() {
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onError: (error) => {
+      console.log('Error updating profile: ', error);
       toast.error(error.message);
     },
     onSuccess: (data) => {
@@ -28,8 +29,33 @@ export default function ProfileView() {
     },
   });
 
+  const UploadImageMutation = useMutation({
+    mutationFn: uploadImage,
+    onError: (error) => {
+      console.log('Error uploading image:', error);
+      toast.error(error.message);
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['user'], (prevData: User) => {
+        return {
+          ...prevData,
+          image: data.image,
+        };
+      });
+    },
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      UploadImageMutation.mutate(e.target.files[0]);
+    }
+  };
+
   const handleUserProfileForm = (formData: ProfileForm) => {
-    updateProfileMutation.mutate(formData);
+    const user: User = queryClient.getQueryData(['user'])!;
+    user.description = formData.description;
+    user.handle = formData.handle;
+    updateProfileMutation.mutate(user);
   };
   return (
     <form
@@ -55,7 +81,7 @@ export default function ProfileView() {
       <div className='grid grid-cols-1 gap-2'>
         <label htmlFor='description'>Description:</label>
         <textarea
-          className='border-none bg-slate-100 rounded-lg p-2'
+          className='border-none bg-slate-100 rounded-lg p-2 min-h-12 max-h-72'
           placeholder='Your description'
           {...register('description', {
             required: 'Description is required',
@@ -74,7 +100,7 @@ export default function ProfileView() {
           name='handle'
           className='border-none bg-slate-100 rounded-lg p-2'
           accept='image/*'
-          onChange={() => {}}
+          onChange={handleChange}
         />
       </div>
 
